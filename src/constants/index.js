@@ -9,7 +9,20 @@ const USER_ROLES = Object.freeze({
   DRIVER: 'driver',
 });
 
+const ORDER_STATUSES = Object.freeze({
+  PENDING: 'pending',
+  IN_TRANSIT: 'in_transit',
+  DELIVERED: 'delivered',
+});
+
+const ORDER_PRIORITIES = Object.freeze({
+  NORMAL: 'normal',
+  HIGH: 'high',
+});
+
 module.exports = Object.freeze({
   PRODUCT_STATUSES,
   USER_ROLES,
+  ORDER_STATUSES,
+  ORDER_PRIORITIES,
 });
