@@ -1,22 +1,23 @@
 const ProductRepository = require('../repositories/products.repository');
 const { PRODUCT_STATUSES } = require('../constants');
+const { NotFoundError, ValidationError } = require('../errors/app.error');
 
 class ProductService {
   static async create({ name, price, stock, status }) {
     if (!name || price === undefined) {
-      throw new Error('Faltan datos obligatorios del producto');
+      throw new ValidationError('Faltan datos obligatorios del producto');
     }
 
     if (typeof price !== 'number' || price < 0) {
-      throw new Error('El precio debe ser un numero mayor o igual a 0');
+      throw new ValidationError('El precio debe ser un numero mayor o igual a 0');
     }
 
     if (stock !== undefined && (typeof stock !== 'number' || stock < 0)) {
-      throw new Error('El stock debe ser un numero mayor o igual a 0');
+      throw new ValidationError('El stock debe ser un numero mayor o igual a 0');
     }
 
     if (status && !Object.values(PRODUCT_STATUSES).includes(status)) {
-      throw new Error('Estado de producto invalido');
+      throw new ValidationError('Estado de producto invalido');
     }
 
     const productStock = stock !== undefined ? stock : 0;
@@ -39,7 +40,7 @@ class ProductService {
     const product = await ProductRepository.getById(id);
 
     if (!product) {
-      throw new Error('Producto no encontrado');
+      throw new NotFoundError('Producto no encontrado');
     }
 
     return product;

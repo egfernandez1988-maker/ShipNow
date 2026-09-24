@@ -1,6 +1,9 @@
 node_modules
 .env
 *.log
+coverage
+uploads/*
+!uploads/.gitkeep
 work-npm-cache
 
 seed.js
