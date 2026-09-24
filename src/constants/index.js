@@ -20,9 +20,16 @@ const ORDER_PRIORITIES = Object.freeze({
   HIGH: 'high',
 });
 
+const DELIVERY_STATUSES = Object.freeze({
+  ASSIGNED: 'assigned',
+  IN_TRANSIT: 'in_transit',
+  DELIVERED: 'delivered',
+});
+
 module.exports = Object.freeze({
   PRODUCT_STATUSES,
   USER_ROLES,
   ORDER_STATUSES,
   ORDER_PRIORITIES,
+  DELIVERY_STATUSES,
 });
