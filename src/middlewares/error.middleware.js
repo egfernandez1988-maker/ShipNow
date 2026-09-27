@@ -3,6 +3,7 @@ const {
   NotFoundError,
   ValidationError,
 } = require('../errors/app.error');
+const logger = require('../config/logger.config');
 
 function notFoundHandler(req, res, next) {
   next(new NotFoundError(`Ruta no encontrada: ${req.method} ${req.originalUrl}`));
@@ -25,6 +26,19 @@ function errorHandler(error, req, res, next) {
   const message = normalizedError instanceof AppError
     ? normalizedError.message
     : 'Error interno del servidor';
+
+  const logData = {
+    method: req.method,
+    path: req.originalUrl,
+    statusCode,
+    error: normalizedError.message,
+  };
+
+  if (statusCode >= 500) {
+    logger.error('Error no controlado en la solicitud', logData);
+  } else {
+    logger.warn('Error de solicitud', logData);
+  }
 
   res.status(statusCode).json({
     status: 'error',
