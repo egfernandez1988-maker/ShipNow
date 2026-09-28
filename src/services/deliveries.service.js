@@ -8,6 +8,7 @@ const {
   ValidationError,
   InvalidStatusError,
 } = require('../errors/app.error');
+const { parsePagination, buildPaginatedResponse } = require('../utils/pagination');
 
 class DeliveryService {
   static async create({ orderId, courierId, status }) {
@@ -37,8 +38,10 @@ class DeliveryService {
     });
   }
 
-  static async getAll() {
-    return DeliveryRepository.getAll();
+  static async getAll(query) {
+    const pagination = parsePagination(query);
+    const { data, total } = await DeliveryRepository.getAll(pagination);
+    return buildPaginatedResponse(data, total, pagination);
   }
 
   static async getById(id) {

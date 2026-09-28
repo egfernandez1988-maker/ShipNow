@@ -1,27 +1,24 @@
+const os = require('os');
+const path = require('path');
+
 process.env.NODE_ENV = 'test';
 process.env.PORT = '8080';
 process.env.MONGODB_URI = 'mongodb://localhost:27017/shipnow-test';
+process.env.UPLOAD_DIR = path.join(os.tmpdir(), 'shipnow-test-uploads');
 
 const fs = require('fs/promises');
-const path = require('path');
 const { expect } = require('chai');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const request = require('supertest');
 const app = require('../src/app');
 const logger = require('../src/config/logger.config');
+const config = require('../src/config');
 
 let mongoServer;
 
 async function cleanUploads() {
-  const uploadsDirectory = path.join(process.cwd(), 'uploads');
-  const entries = await fs.readdir(uploadsDirectory);
-
-  await Promise.all(
-    entries
-      .filter((entry) => entry !== '.gitkeep')
-      .map((entry) => fs.unlink(path.join(uploadsDirectory, entry)))
-  );
+  await fs.rm(config.UPLOAD_DIR, { recursive: true, force: true });
 }
 
 describe('ShipNow API', () => {
@@ -62,6 +59,18 @@ describe('ShipNow API', () => {
       .to.equal(successResponse.body.orders[0]._id);
     expect(errorResponse.status).to.equal(400);
     expect(errorResponse.body).to.include({ status: 'error' });
+  });
+
+  it('pagina los listados y limita el tamano de respuesta', async () => {
+    await request(app).post('/api/users').send({ name: 'Usuario Uno', email: 'uno@example.com' });
+    await request(app).post('/api/users').send({ name: 'Usuario Dos', email: 'dos@example.com' });
+
+    const response = await request(app).get('/api/users?page=1&limit=1');
+
+    expect(response.status).to.equal(200);
+    expect(response.body.data).to.have.lengthOf(1);
+    expect(response.body.pagination).to.include({ page: 1, limit: 1 });
+    expect(response.body.pagination.total).to.be.at.least(2);
   });
 
   it('ejecuta el endpoint interno de logger fuera de produccion', async () => {

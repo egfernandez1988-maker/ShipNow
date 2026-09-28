@@ -14,7 +14,7 @@ class ProductController {
 
   static async getAll(req, res, next) {
     try {
-      const products = await ProductService.getAll();
+      const products = await ProductService.getAll(req.query);
 
       res.json(products);
     } catch (error) {

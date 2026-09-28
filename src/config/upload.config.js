@@ -2,10 +2,11 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const config = require('./env.config');
 const { UPLOAD_LIMITS } = require('../constants');
 const { InvalidFileTypeError } = require('../errors/app.error');
 
-const uploadDirectory = path.join(process.cwd(), 'uploads');
+const uploadDirectory = config.UPLOAD_DIR;
 
 fs.mkdirSync(uploadDirectory, { recursive: true });
 

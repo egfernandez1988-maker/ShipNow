@@ -12,8 +12,9 @@ class UserRepository {
     return user;
   }
 
-  static async getAll() {
-    return User.find();
+  static async getAll({ skip, limit }) {
+    const [data, total] = await Promise.all([User.find().skip(skip).limit(limit), User.countDocuments()]);
+    return { data, total };
   }
 
   static async getById(id) {

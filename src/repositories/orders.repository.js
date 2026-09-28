@@ -5,8 +5,9 @@ class OrderRepository {
     return Order.create(orderData);
   }
 
-  static async getAll() {
-    return Order.find();
+  static async getAll({ skip, limit }) {
+    const [data, total] = await Promise.all([Order.find().skip(skip).limit(limit), Order.countDocuments()]);
+    return { data, total };
   }
 
   static async getById(id) {

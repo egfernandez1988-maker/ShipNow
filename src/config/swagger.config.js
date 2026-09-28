@@ -201,4 +201,20 @@ const swaggerDefinition = {
   },
 };
 
+const paginationParameters = [
+  { name: 'page', in: 'query', schema: { type: 'integer', minimum: 1, default: 1 } },
+  { name: 'limit', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 } },
+];
+
+for (const path of ['/api/users', '/api/products', '/api/couriers', '/api/orders', '/api/deliveries']) {
+  swaggerDefinition.paths[path].get.parameters = paginationParameters;
+  swaggerDefinition.paths[path].get.responses[200] = successResponse('Resultados paginados', {
+    type: 'object',
+    properties: {
+      data: { type: 'array', items: {} },
+      pagination: { type: 'object', properties: { page: { type: 'integer' }, limit: { type: 'integer' }, total: { type: 'integer' }, totalPages: { type: 'integer' } } },
+    },
+  });
+}
+
 module.exports = swaggerJsdoc({ definition: swaggerDefinition, apis: [] });

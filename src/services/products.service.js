@@ -1,6 +1,7 @@
 const ProductRepository = require('../repositories/products.repository');
 const { PRODUCT_STATUSES } = require('../constants');
 const { NotFoundError, ValidationError } = require('../errors/app.error');
+const { parsePagination, buildPaginatedResponse } = require('../utils/pagination');
 
 class ProductService {
   static async create({ name, price, stock, status }) {
@@ -30,10 +31,10 @@ class ProductService {
     });
   }
 
-  static async getAll() {
-    const products = await ProductRepository.getAll();
-
-    return products.filter((product) => product.stock > 0);
+  static async getAll(query) {
+    const pagination = parsePagination(query);
+    const { data, total } = await ProductRepository.getAll({ ...pagination, filter: { stock: { $gt: 0 } } });
+    return buildPaginatedResponse(data, total, pagination);
   }
 
   static async getById(id) {

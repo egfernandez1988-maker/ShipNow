@@ -5,8 +5,9 @@ class DeliveryRepository {
     return Delivery.create(deliveryData);
   }
 
-  static async getAll() {
-    return Delivery.find();
+  static async getAll({ skip, limit }) {
+    const [data, total] = await Promise.all([Delivery.find().skip(skip).limit(limit), Delivery.countDocuments()]);
+    return { data, total };
   }
 
   static async getById(id) {

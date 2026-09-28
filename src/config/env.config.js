@@ -1,4 +1,5 @@
 const dotenv = require('dotenv');
+const path = require('path');
 
 dotenv.config({ quiet: true });
 
@@ -14,6 +15,7 @@ const config = {
   PORT: process.env.PORT,
   MONGODB_URI: process.env.MONGODB_URI,
   NODE_ENV: process.env.NODE_ENV,
+  UPLOAD_DIR: process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'),
 };
 
 module.exports = Object.freeze(config);

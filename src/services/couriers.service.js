@@ -1,5 +1,6 @@
 const CourierRepository = require('../repositories/couriers.repository');
 const { NotFoundError, ValidationError } = require('../errors/app.error');
+const { parsePagination, buildPaginatedResponse } = require('../utils/pagination');
 
 class CourierService {
   static async create({ name, zone, available }) {
@@ -18,8 +19,10 @@ class CourierService {
     });
   }
 
-  static async getAll() {
-    return CourierRepository.getAll();
+  static async getAll(query) {
+    const pagination = parsePagination(query);
+    const { data, total } = await CourierRepository.getAll(pagination);
+    return buildPaginatedResponse(data, total, pagination);
   }
 
   static async getById(id) {

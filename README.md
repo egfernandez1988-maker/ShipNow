@@ -30,6 +30,8 @@ Crear `.env` a partir de `.env.example` y completar:
 PORT=8080
 MONGODB_URI=mongodb://localhost:27017/shipnow
 NODE_ENV=development
+# Opcional. Usa una ruta fuera de OneDrive si el sistema bloquea uploads.
+UPLOAD_DIR=C:/shipnow-uploads
 ```
 
 La aplicacion valida las tres variables al iniciar y falla con un mensaje claro si falta alguna. No subir `.env` al repositorio.
@@ -101,7 +103,7 @@ docker compose down -v
 
 Winston guarda actividad general en `logs/combined.log` y errores en `logs/error.log`. En desarrollo tambien escribe en consola; en produccion solo usa archivos.
 
-Multer acepta PDF, JPEG y PNG de hasta 5 MB:
+Multer acepta PDF, JPEG y PNG de hasta 5 MB. Por defecto usa `uploads/`; `UPLOAD_DIR` permite definir otra carpeta para entornos sincronizados como OneDrive.
 
 - `POST /api/users/:id/documents` con el campo `document`.
 - `POST /api/orders/:id/proofs` con el campo `proof`.
@@ -110,6 +112,8 @@ Multer acepta PDF, JPEG y PNG de hasta 5 MB:
 Los metadatos se guardan en MongoDB. Los archivos locales de `uploads/`, logs y coverage estan ignorados por Git; `uploads/.gitkeep` preserva la carpeta vacia.
 
 ## Endpoints principales
+
+Los endpoints de listado de usuarios, productos, repartidores, envios y entregas aceptan `?page=1&limit=20`. El limite maximo es 100 y responden con `data` y `pagination`.
 
 | Metodo | Ruta | Descripcion |
 | --- | --- | --- |

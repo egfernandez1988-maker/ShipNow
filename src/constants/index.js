@@ -40,6 +40,8 @@ const UPLOAD_LIMITS = Object.freeze({
   ]),
 });
 
+const PAGINATION = Object.freeze({ DEFAULT_PAGE: 1, DEFAULT_LIMIT: 20, MAX_LIMIT: 100 });
+
 module.exports = Object.freeze({
   PRODUCT_STATUSES,
   USER_ROLES,
@@ -48,4 +50,5 @@ module.exports = Object.freeze({
   DELIVERY_STATUSES,
   MOCK_LIMITS,
   UPLOAD_LIMITS,
+  PAGINATION,
 });

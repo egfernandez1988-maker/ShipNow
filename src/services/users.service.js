@@ -1,6 +1,7 @@
 const UserRepository = require('../repositories/users.repository');
 const { USER_ROLES } = require('../constants');
 const { NotFoundError, ValidationError } = require('../errors/app.error');
+const { parsePagination, buildPaginatedResponse } = require('../utils/pagination');
 
 class UserService {
   static async create({ name, email, role }) {
@@ -15,8 +16,10 @@ class UserService {
     return UserRepository.create({ name, email, role });
   }
 
-  static async getAll() {
-    return UserRepository.getAll();
+  static async getAll(query) {
+    const pagination = parsePagination(query);
+    const { data, total } = await UserRepository.getAll(pagination);
+    return buildPaginatedResponse(data, total, pagination);
   }
 
   static async getById(id) {

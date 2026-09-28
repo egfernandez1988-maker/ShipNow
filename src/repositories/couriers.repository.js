@@ -5,8 +5,9 @@ class CourierRepository {
     return Courier.create(courierData);
   }
 
-  static async getAll() {
-    return Courier.find();
+  static async getAll({ skip, limit }) {
+    const [data, total] = await Promise.all([Courier.find().skip(skip).limit(limit), Courier.countDocuments()]);
+    return { data, total };
   }
 
   static async getById(id) {

@@ -12,7 +12,7 @@ class CourierController {
 
   static async getAll(req, res, next) {
     try {
-      const couriers = await CourierService.getAll();
+      const couriers = await CourierService.getAll(req.query);
       res.status(200).json(couriers);
     } catch (error) {
       next(error);
