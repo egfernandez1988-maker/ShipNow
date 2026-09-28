@@ -26,10 +26,16 @@ const DELIVERY_STATUSES = Object.freeze({
   DELIVERED: 'delivered',
 });
 
+const MOCK_LIMITS = Object.freeze({
+  DEFAULT_QUANTITY: 10,
+  MAX_QUANTITY: 100,
+});
+
 module.exports = Object.freeze({
   PRODUCT_STATUSES,
   USER_ROLES,
   ORDER_STATUSES,
   ORDER_PRIORITIES,
   DELIVERY_STATUSES,
+  MOCK_LIMITS,
 });
