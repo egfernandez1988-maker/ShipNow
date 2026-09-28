@@ -16,6 +16,14 @@ class DeliveryRepository {
   static async updateStatus(id, status) {
     return Delivery.findByIdAndUpdate(id, { status }, { new: true, runValidators: true });
   }
+
+  static async addProof(id, proof) {
+    return Delivery.findByIdAndUpdate(
+      id,
+      { $push: { proofs: proof } },
+      { new: true, runValidators: true }
+    );
+  }
 }
 
 module.exports = DeliveryRepository;

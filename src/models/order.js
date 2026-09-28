@@ -26,6 +26,16 @@ const orderSchema = new mongoose.Schema({
     },
   ],
   courierId: { type: mongoose.Schema.Types.ObjectId, ref: "Courier" },
+  proofs: [
+    {
+      originalName: { type: String, required: true },
+      filename: { type: String, required: true },
+      mimetype: { type: String, required: true },
+      size: { type: Number, required: true },
+      path: { type: String, required: true },
+      uploadedAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 module.exports = mongoose.model("Order", orderSchema);

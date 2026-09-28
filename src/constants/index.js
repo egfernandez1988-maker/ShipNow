@@ -31,6 +31,15 @@ const MOCK_LIMITS = Object.freeze({
   MAX_QUANTITY: 100,
 });
 
+const UPLOAD_LIMITS = Object.freeze({
+  MAX_FILE_SIZE_BYTES: 5 * 1024 * 1024,
+  ALLOWED_MIME_TYPES: Object.freeze([
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+  ]),
+});
+
 module.exports = Object.freeze({
   PRODUCT_STATUSES,
   USER_ROLES,
@@ -38,4 +47,5 @@ module.exports = Object.freeze({
   ORDER_PRIORITIES,
   DELIVERY_STATUSES,
   MOCK_LIMITS,
+  UPLOAD_LIMITS,
 });

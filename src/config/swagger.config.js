@@ -25,6 +25,7 @@ const swaggerDefinition = {
     { name: 'Orders', description: 'Gestion de envios' },
     { name: 'Deliveries', description: 'Gestion y tracking de entregas' },
     { name: 'Mocks', description: 'Datos simulados no persistentes' },
+    { name: 'Files', description: 'Documentos y comprobantes adjuntos' },
   ],
   paths: {
     '/api/health': {
@@ -138,6 +139,27 @@ const swaggerDefinition = {
         tags: ['Mocks'], summary: 'Genera datos simulados sin persistirlos',
         parameters: [{ name: 'quantity', in: 'query', schema: { type: 'integer', minimum: 1, maximum: 100, default: 10 } }],
         responses: { 200: successResponse('Mocks generados', { $ref: '#/components/schemas/MocksResponse' }), 400: { $ref: '#/components/responses/BadRequest' } },
+      },
+    },
+    '/api/users/{id}/documents': {
+      post: {
+        tags: ['Files'], summary: 'Adjunta un documento a un usuario', parameters: [{ $ref: '#/components/parameters/Id' }],
+        requestBody: { required: true, content: { 'multipart/form-data': { schema: { type: 'object', required: ['document'], properties: { document: { type: 'string', format: 'binary' } } } } } },
+        responses: { 200: successResponse('Documento asociado', { $ref: '#/components/schemas/User' }), 400: { $ref: '#/components/responses/BadRequest' }, 404: { $ref: '#/components/responses/NotFound' } },
+      },
+    },
+    '/api/orders/{id}/proofs': {
+      post: {
+        tags: ['Files'], summary: 'Adjunta un comprobante a un envio', parameters: [{ $ref: '#/components/parameters/Id' }],
+        requestBody: { required: true, content: { 'multipart/form-data': { schema: { type: 'object', required: ['proof'], properties: { proof: { type: 'string', format: 'binary' } } } } } },
+        responses: { 200: successResponse('Comprobante asociado', { $ref: '#/components/schemas/Order' }), 400: { $ref: '#/components/responses/BadRequest' }, 404: { $ref: '#/components/responses/NotFound' } },
+      },
+    },
+    '/api/deliveries/{id}/proofs': {
+      post: {
+        tags: ['Files'], summary: 'Adjunta un comprobante a una entrega', parameters: [{ $ref: '#/components/parameters/Id' }],
+        requestBody: { required: true, content: { 'multipart/form-data': { schema: { type: 'object', required: ['proof'], properties: { proof: { type: 'string', format: 'binary' } } } } } },
+        responses: { 200: successResponse('Comprobante asociado', { $ref: '#/components/schemas/Delivery' }), 400: { $ref: '#/components/responses/BadRequest' }, 404: { $ref: '#/components/responses/NotFound' } },
       },
     },
   },

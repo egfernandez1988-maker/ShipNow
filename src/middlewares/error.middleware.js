@@ -20,6 +20,10 @@ function errorHandler(error, req, res, next) {
     normalizedError = new ValidationError(error.message);
   }
 
+  if (error.code === 'LIMIT_FILE_SIZE') {
+    normalizedError = new ValidationError('El archivo supera el limite de 5 MB');
+  }
+
   const statusCode = normalizedError instanceof AppError
     ? normalizedError.statusCode
     : 500;

@@ -16,6 +16,14 @@ class OrderRepository {
   static async updateStatus(id, status) {
     return Order.findByIdAndUpdate(id, { status }, { new: true, runValidators: true });
   }
+
+  static async addProof(id, proof) {
+    return Order.findByIdAndUpdate(
+      id,
+      { $push: { proofs: proof } },
+      { new: true, runValidators: true }
+    );
+  }
 }
 
 module.exports = OrderRepository;

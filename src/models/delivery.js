@@ -11,6 +11,16 @@ const deliverySchema = new mongoose.Schema({
     default: DELIVERY_STATUSES.ASSIGNED,
   },
   assignedAt: { type: Date, default: Date.now },
+  proofs: [
+    {
+      originalName: { type: String, required: true },
+      filename: { type: String, required: true },
+      mimetype: { type: String, required: true },
+      size: { type: Number, required: true },
+      path: { type: String, required: true },
+      uploadedAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 module.exports = mongoose.model("Delivery", deliverySchema);

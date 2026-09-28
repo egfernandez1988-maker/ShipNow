@@ -19,6 +19,14 @@ class UserRepository {
   static async getById(id) {
     return User.findById(id);
   }
+
+  static async addDocument(id, document) {
+    return User.findByIdAndUpdate(
+      id,
+      { $push: { documents: document } },
+      { new: true, runValidators: true }
+    );
+  }
 }
 
 module.exports = UserRepository;
