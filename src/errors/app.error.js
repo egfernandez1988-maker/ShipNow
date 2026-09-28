@@ -44,6 +44,12 @@ class InvalidMockQuantityError extends AppError {
   }
 }
 
+class ForbiddenError extends AppError {
+  constructor(message = 'No tienes permisos para acceder a este recurso') {
+    super(message, 403);
+  }
+}
+
 module.exports = {
   AppError,
   NotFoundError,
@@ -52,4 +58,5 @@ module.exports = {
   FileRequiredError,
   InvalidFileTypeError,
   InvalidMockQuantityError,
+  ForbiddenError,
 };

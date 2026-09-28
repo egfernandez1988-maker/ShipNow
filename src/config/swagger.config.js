@@ -26,6 +26,7 @@ const swaggerDefinition = {
     { name: 'Deliveries', description: 'Gestion y tracking de entregas' },
     { name: 'Mocks', description: 'Datos simulados no persistentes' },
     { name: 'Files', description: 'Documentos y comprobantes adjuntos' },
+    { name: 'Logger', description: 'Verificacion interna de logging' },
   ],
   paths: {
     '/api/health': {
@@ -141,6 +142,13 @@ const swaggerDefinition = {
         responses: { 200: successResponse('Mocks generados', { $ref: '#/components/schemas/MocksResponse' }), 400: { $ref: '#/components/responses/BadRequest' } },
       },
     },
+    '/api/logger/test': {
+      get: {
+        tags: ['Logger'], summary: 'Genera eventos de prueba del logger',
+        description: 'Disponible fuera de produccion. En produccion responde 403.',
+        responses: { 200: successResponse('Eventos generados', { $ref: '#/components/schemas/LoggerResponse' }), 403: { $ref: '#/components/responses/Forbidden' } },
+      },
+    },
     '/api/users/{id}/documents': {
       post: {
         tags: ['Files'], summary: 'Adjunta un documento a un usuario', parameters: [{ $ref: '#/components/parameters/Id' }],
@@ -169,6 +177,7 @@ const swaggerDefinition = {
       BadRequest: successResponse('Datos invalidos', { $ref: '#/components/schemas/Error' }),
       NotFound: successResponse('Recurso no encontrado', { $ref: '#/components/schemas/Error' }),
       InternalError: successResponse('Error interno', { $ref: '#/components/schemas/Error' }),
+      Forbidden: successResponse('Acceso no permitido', { $ref: '#/components/schemas/Error' }),
     },
     schemas: {
       Error: { type: 'object', required: ['status', 'message'], properties: { status: { type: 'string', example: 'error' }, message: { type: 'string', example: 'Recurso no encontrado' } } },
@@ -187,6 +196,7 @@ const swaggerDefinition = {
       Delivery: { allOf: [{ $ref: '#/components/schemas/DeliveryInput' }, { type: 'object', properties: { _id: { type: 'string' }, assignedAt: { type: 'string', format: 'date-time' } } }] },
       TrackingResponse: { type: 'object', properties: { delivery: { $ref: '#/components/schemas/Delivery' }, tracking: { type: 'object', properties: { status: { type: 'string' } } } } },
       MocksResponse: { type: 'object', properties: { users: { type: 'array', items: { $ref: '#/components/schemas/User' } }, products: { type: 'array', items: { $ref: '#/components/schemas/Product' } }, couriers: { type: 'array', items: { $ref: '#/components/schemas/Courier' } }, orders: { type: 'array', items: { $ref: '#/components/schemas/Order' } }, deliveries: { type: 'array', items: { $ref: '#/components/schemas/Delivery' } } } },
+      LoggerResponse: { type: 'object', properties: { status: { type: 'string', example: 'ok' }, message: { type: 'string', example: 'Eventos de logger generados' } } },
     },
   },
 };

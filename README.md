@@ -1,170 +1,138 @@
-# ShipNow
+# ShipNow API
 
-API de demostracion de una plataforma de **logistica / envios**, construida con
-**Node.js + Express + MongoDB (Mongoose)**.
+API backend para la gestion de usuarios, productos, repartidores, envios y entregas. Fue construida con Node.js, Express y MongoDB como entrega final del curso Backend III.
 
-Este proyecto es **material didactico** del curso **Backend 3 de CoderHouse**.
-Es la **pre-entrega del Modulo 1**: la API comienza su refactorizacion desde un
-modelo monolitico hacia una arquitectura profesional por capas.
+## Tecnologias
 
-## Que hace ShipNow
+- Node.js y Express
+- MongoDB y Mongoose
+- Winston para logging
+- Multer para carga de documentos y comprobantes
+- Swagger UI para documentacion interactiva
+- Mocha, Chai, Supertest y mongodb-memory-server para pruebas funcionales
+- Docker y Docker Compose
 
-Gestiona cinco entidades:
+## Arquitectura
 
-- **Order** (envio/pedido): `customerName`, `customer` (ref a User), `address`, `weight`, `cost` (calculado), `status`, `priority`, `items` (array de `{ name, quantity, price }`), `courierId`.
-- **User** (cliente): `name`, `email`, `role` (admin / customer / driver).
-- **Courier** (repartidor): `name`, `zone`, `available`.
-- **Product** (producto): `name`, `price`, `stock`, `status` (available / out_of_stock).
-- **Delivery** (entrega): `orderId` (ref a Order), `courierId` (ref a Courier), `status` (assigned / in_transit / delivered), `assignedAt`.
+Las rutas principales siguen Controller -> Service -> Repository:
 
-Regla de negocio principal (hoy embebida en la ruta de orders):
-`cost = weight * 10`. Al crear un envio tambien se dispara una notificacion falsa.
-Al consultar una entrega por id (`GET /api/deliveries/:id`) se llama inline a un
-"proveedor externo" de tracking falso (`src/services/trackingProvider.js`).
+- El Controller recibe la solicitud HTTP y responde.
+- El Service contiene reglas de negocio, validaciones, calculo de costos, tracking y limpieza de archivos no asociados.
+- El Repository concentra las operaciones con Mongoose y MongoDB.
 
-## Como correrlo
+Los mocks no usan Repository porque se generan en memoria y no se persisten. Esta separacion evita que los routers y controllers conozcan detalles de la base de datos.
 
-Requisitos: Node.js y una instancia de MongoDB corriendo en `localhost:27017`.
+## Variables de entorno
 
-Para levantar MongoDB rapido con Docker:
+Crear `.env` a partir de `.env.example` y completar:
 
-```bash
-docker run -d -p 27017:27017 --name shipnow-mongo mongo
+```env
+PORT=8080
+MONGODB_URI=mongodb://localhost:27017/shipnow
+NODE_ENV=development
 ```
 
-Tambien sirve una instalacion local de MongoDB o un cluster de MongoDB Atlas
-(en ese caso ajusta la variable `MONGODB_URI` en tu archivo `.env`).
+La aplicacion valida las tres variables al iniciar y falla con un mensaje claro si falta alguna. No subir `.env` al repositorio.
+
+## Ejecucion local
+
+Requisitos: Node.js 22 o superior y MongoDB disponible localmente o en Atlas.
 
 ```bash
-# 1. Instalar dependencias
 npm install
-
-# 2. Crear el archivo de entorno
-cp .env.example .env
-
-# 3. Completar las variables requeridas en .env
-# PORT=8080
-# MONGODB_URI=mongodb://localhost:27017/shipnow
-# NODE_ENV=development
-
-# 4. (Opcional) Cargar datos de ejemplo relacionados
-npm run seed
-
-# 5. Levantar el servidor
 npm start
-# o
-npm run dev
 ```
 
-El servidor queda escuchando en `http://localhost:8080`.
+En PowerShell, para crear el archivo de entorno:
 
-> La aplicacion valida `PORT`, `MONGODB_URI` y `NODE_ENV` al iniciar. Si falta
-> alguna variable, falla inmediatamente con un mensaje claro.
+```powershell
+Copy-Item .env.example .env
+```
 
-## Arquitectura por capas
+La API queda disponible en `http://localhost:8080`.
 
-Para `Users` y `Products` se separo la responsabilidad en tres capas:
-
-- **Controller:** recibe `req`, llama al service y devuelve la respuesta HTTP con
-  el status code correspondiente.
-- **Service:** concentra la logica de negocio y validaciones. Por ejemplo,
-  `ProductsService.getAll()` filtra los productos sin stock antes de responder.
-- **Repository:** es la unica capa de estas entidades que conoce Mongoose y hace
-  llamadas directas a MongoDB.
-
-Elegir esta separacion permite que el Controller no dependa de detalles de base
-de datos, que las reglas de negocio vivan en un lugar testeable, y que los
-repositories se puedan reemplazar o mockear sin reescribir las rutas.
-
-### Endpoints
-
-| Metodo | Ruta                       | Descripcion                       |
-| ------ | -------------------------- | --------------------------------- |
-| GET    | `/`                        | Health check basico               |
-| POST   | `/api/users`               | Crear cliente                     |
-| GET    | `/api/users`               | Listar clientes                   |
-| GET    | `/api/users/:id`           | Obtener cliente por id            |
-| POST   | `/api/products`            | Crear producto                    |
-| GET    | `/api/products`            | Listar productos                  |
-| GET    | `/api/products/:id`        | Obtener producto por id           |
-| POST   | `/api/couriers`            | Crear repartidor                  |
-| GET    | `/api/couriers`            | Listar repartidores               |
-| GET    | `/api/couriers/:id`        | Obtener repartidor por id         |
-| POST   | `/api/orders`              | Crear envio                       |
-| GET    | `/api/orders`              | Listar envios                     |
-| GET    | `/api/orders/:id`          | Obtener envio por id              |
-| PATCH  | `/api/orders/:id/status`   | Cambiar estado de un envio        |
-| POST   | `/api/deliveries`          | Crear entrega (order + courier)   |
-| GET    | `/api/deliveries`          | Listar entregas                   |
-| GET    | `/api/deliveries/:id`      | Obtener entrega + tracking        |
-| PATCH  | `/api/deliveries/:id/status` | Cambiar estado de una entrega   |
-
-Ejemplo de creacion de envio:
+## Tests
 
 ```bash
-curl -X POST http://localhost:8080/api/orders \
-  -H "Content-Type: application/json" \
-  -d '{"customerName":"Ana Lopez","address":"Calle Falsa 123","weight":5}'
+npm test
 ```
 
-## Probar con Postman
+La suite usa una instancia temporal de MongoDB en memoria, separada de la base configurada en `.env`. Cubre health check, Swagger, mocks, creacion y actualizacion de envios, entregas, errores y carga de archivos. La primera ejecucion puede descargar el binario temporal de MongoDB.
 
-En la carpeta `postman/` hay una coleccion lista para importar:
-`postman/ShipNow.postman_collection.json`.
+## Swagger
 
-1. Abre Postman -> **Import** -> selecciona el archivo.
-2. La coleccion trae una variable `{{baseUrl}}` que por defecto apunta a
-   `http://localhost:8080`. Si cambias el puerto, edita esa variable.
-3. Hay una carpeta por entidad (Users, Products, Couriers, Orders, Deliveries)
-   con un request por endpoint. Los POST/PATCH incluyen un body JSON de ejemplo.
-4. Para los requests que usan `:id` (o refs como `customer`, `orderId`,
-   `courierId`), copia los ids reales de la respuesta de un GET/POST previo.
+La documentacion interactiva esta disponible en:
 
-## Deuda tecnica conocida
+```text
+http://localhost:8080/api/docs/
+```
 
-Esta seccion es **intencional y honesta**: lista los problemas que el codigo tiene
-hoy a proposito, y que iremos resolviendo modulo a modulo durante el curso.
+Incluye los endpoints actuales de usuarios, productos, repartidores, envios, entregas, mocks, health check y carga de archivos.
 
-1. **Entidades pendientes de refactor.** `Users` y `Products` ya usan
-   Controller-Service-Repository. `Orders`, `Couriers` y `Deliveries` quedan como
-   parte del baseline para refactorizar en los siguientes modulos.
+El endpoint interno `GET /api/logger/test` genera eventos de prueba y solo esta disponible fuera de produccion.
 
-2. **Controllers gordos (fat controllers) / logica en las rutas.** Algunas rutas
-   que no forman parte de esta pre-entrega todavia mezclan validacion manual,
-   logica de negocio, acceso directo a la base y efectos secundarios. El ejemplo
-   mas claro es `src/routes/orders.js`.
+## Docker
 
-3. **Acoplamiento del efecto secundario.** La notificacion
-   (`src/services/notifications.js`) se importa y se llama inline dentro de la ruta
-   de orders, acoplando la logica de negocio con el envio de notificaciones.
+El proyecto incluye un Dockerfile multi-stage y `docker-compose.yml`. Compose inicia MongoDB, espera su health check y luego levanta la API.
 
-4. **Manejo de errores crudo.** Todos los `try/catch` responden con un generico
-   `res.status(500).send("Error del servidor")`. No hay una capa de errores ni
-   errores de dominio personalizados.
+```bash
+docker compose up --build
+```
 
-5. **Logging pobre.** Solo se usa `console.log`. No hay un logger real con niveles,
-   formato ni transporte.
+En instalaciones antiguas de Docker Compose:
 
-6. **Validacion manual repetida.** Cada ruta (`products`, `deliveries`, `orders`,
-   etc.) repite chequeos `if (!campo)` a mano. No hay esquemas de validacion ni
-   middleware reutilizable.
+```bash
+docker-compose up --build
+```
 
-7. **Integracion externa acoplada.** El "proveedor de tracking"
-   (`src/services/trackingProvider.js`) se llama inline desde la ruta de
-   deliveries, sin abstraccion ni inyeccion. Sirve como ejemplo de algo que
-   habra que mockear en los tests.
+La API se publica en `http://localhost:8080`. Para detener y eliminar los contenedores:
 
-8. **Verificacion de relaciones en la ruta.** Al crear una delivery se hace
-   `Order.findById` / `Courier.findById` directo en el handler para validar que
-   existan, acoplando aun mas la ruta a la base.
+```bash
+docker compose down
+```
 
-9. **Sin tests, sin Swagger, sin upload de archivos, sin Docker.** Estas piezas se
-   agregan en modulos posteriores; su ausencia aca es intencional. El script de
-   seed (`src/seed.js`) y la coleccion de Postman son tooling de apoyo, no
-   features de la API.
+Los datos de MongoDB, uploads y logs quedan en volumenes Docker. Para eliminarlos tambien:
 
-## Roadmap del curso (que vamos a refactorizar)
+```bash
+docker compose down -v
+```
 
-- **Modulo 1:** variables de entorno + capa de configuracion (matar el hardcode).
-- **Modulos siguientes:** capa de services y repositories, manejo de errores,
-  logger profesional, tests, documentacion con Swagger, uploads y Docker.
+## Logs y uploads
+
+Winston guarda actividad general en `logs/combined.log` y errores en `logs/error.log`. En desarrollo tambien escribe en consola; en produccion solo usa archivos.
+
+Multer acepta PDF, JPEG y PNG de hasta 5 MB:
+
+- `POST /api/users/:id/documents` con el campo `document`.
+- `POST /api/orders/:id/proofs` con el campo `proof`.
+- `POST /api/deliveries/:id/proofs` con el campo `proof`.
+
+Los metadatos se guardan en MongoDB. Los archivos locales de `uploads/`, logs y coverage estan ignorados por Git; `uploads/.gitkeep` preserva la carpeta vacia.
+
+## Endpoints principales
+
+| Metodo | Ruta | Descripcion |
+| --- | --- | --- |
+| GET | `/api/health` | Estado de la API |
+| GET | `/api/docs/` | Swagger UI |
+| GET | `/api/mocks?quantity=10` | Datos simulados no persistentes |
+| GET | `/api/logger/test` | Verificacion de logger fuera de produccion |
+| POST / GET | `/api/users` | Crear o listar usuarios |
+| GET | `/api/users/:id` | Obtener usuario |
+| POST | `/api/users/:id/documents` | Adjuntar documento |
+| POST / GET | `/api/products` | Crear o listar productos con stock |
+| POST / GET | `/api/couriers` | Crear o listar repartidores |
+| POST / GET | `/api/orders` | Crear o listar envios |
+| PATCH | `/api/orders/:id/status` | Actualizar estado de envio |
+| POST / GET | `/api/deliveries` | Crear o listar entregas |
+| GET | `/api/deliveries/:id` | Entrega y tracking |
+| PATCH | `/api/deliveries/:id/status` | Actualizar estado de entrega |
+
+Las respuestas de error tienen el formato:
+
+```json
+{
+  "status": "error",
+  "message": "Descripcion del error"
+}
+```

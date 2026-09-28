@@ -8,6 +8,7 @@ const couriersRouter = require('./routes/couriers');
 const productsRouter = require('./routes/products');
 const deliveriesRouter = require('./routes/deliveries');
 const mocksRouter = require('./routes/mocks');
+const loggerRouter = require('./routes/logger');
 const {
   notFoundHandler,
   errorHandler,
@@ -25,6 +26,7 @@ app.use('/api/couriers', couriersRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/deliveries', deliveriesRouter);
 app.use('/api/mocks', mocksRouter);
+app.use('/api/logger', loggerRouter);
 
 app.get('/api/health', (req, res) => {
   res.status(200).json({

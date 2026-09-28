@@ -1,0 +1,35 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand(\"ping\").ok' | grep 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongo:27017/shipnow
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - uploads_data:/app/uploads
+      - logs_data:/app/logs
+
+volumes:
+  mongo_data:
+  uploads_data:
+  logs_data:

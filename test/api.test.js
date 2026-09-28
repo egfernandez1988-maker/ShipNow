@@ -64,6 +64,13 @@ describe('ShipNow API', () => {
     expect(errorResponse.body).to.include({ status: 'error' });
   });
 
+  it('ejecuta el endpoint interno de logger fuera de produccion', async () => {
+    const response = await request(app).get('/api/logger/test');
+
+    expect(response.status).to.equal(200);
+    expect(response.body).to.include({ status: 'ok' });
+  });
+
   it('crea y actualiza el estado de un envio', async () => {
     const createResponse = await request(app)
       .post('/api/orders')
